@@ -57,8 +57,15 @@ CLaserReaderDlg::CLaserReaderDlg(CWnd* pParent /*=NULL*/)
 	m_bOpen = false;
 	nPackageIndex = 0;
 
+	char szFileName[256];
+	SYSTEMTIME sysTime;
+
+	GetSystemTime(&sysTime);
+	sprintf(szFileName, "Distance_%2d_%2d_%2d_%2d.txt",
+		sysTime.wMonth, sysTime.wDay, sysTime.wHour, sysTime.wMinute);
+
 	fptr = NULL;
-	fptr = fopen("DistanceValue.txt", "w");
+	fptr = fopen(szFileName, "w");
 
 	szPort[0] = L"COM1";
 	szPort[1] = L"COM2";
@@ -306,6 +313,20 @@ void CLaserReaderDlg::OnTimer(UINT_PTR nIDEvent)
 			}
 			fprintf(fptr, "\n");
 
+			nPlaneTmp = (int)(bTotalPackage[557]);
+			fprintf(fptr, "Plane %d:\n", nPlaneTmp);
+			for (int j = 558; j < 1105; j += 2)
+			{
+				nTmp = (int)(bTotalPackage[j + 1]) * 256+ (int)(bTotalPackage[j]);
+
+				// calculate height
+				nTmp *= dCosine[(j - 558) / 2];
+
+				fprintf(fptr, "%d ", nTmp);
+			}
+			fprintf(fptr, "\n");
+
+			/*
 			nPlaneTmp = (int)(bTotalPackage[1655]);
 			fprintf(fptr, "Plane %d:\n", nPlaneTmp);
 			for (int j = 1656; j < 2203; j += 2)
@@ -318,6 +339,7 @@ void CLaserReaderDlg::OnTimer(UINT_PTR nIDEvent)
 				fprintf(fptr, "%d ", nTmp);
 			}
 			fprintf(fptr, "\n");
+			*/
 		}
 	}
 	
